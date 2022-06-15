@@ -1,4 +1,4 @@
-module cq
+module github.com/sharo-jef/cq
 
 go 1.18
 
