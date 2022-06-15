@@ -1,0 +1,5 @@
+# output binary
+bin
+
+# PowerShell script
+*.ps1
