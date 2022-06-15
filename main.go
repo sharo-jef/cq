@@ -15,7 +15,7 @@ limitations under the License.
 */
 package main
 
-import "cq/cmd"
+import "github.com/sharo-jef/cq/cmd"
 
 func main() {
 	cmd.Execute()
