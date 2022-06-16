@@ -1,6 +1,6 @@
 # cq
 
-csv processor like jq
+csv processor
 
 ```
 $ cat a.csv
