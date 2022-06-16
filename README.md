@@ -16,7 +16,6 @@ $ cq a.csv -o y
   b: x
   c: "y"
   d: z
-
 $ cat a.csv | cq -o j -c
 [{"a":"o","b":"p","c":"q","d":"r"},{"a":"w","b":"x","c":"y","d":"z"}]
 ```
