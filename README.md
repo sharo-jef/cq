@@ -5,25 +5,20 @@ csv processor like jq
 ```
 $ cat a.csv
 a,b,c,d
-1,2,3,4
-5,6,7,8
-$ cq a.csv
-[
-  {
-    "a": "1",
-    "b": "2",
-    "c": "3",
-    "d": "4"
-  },
-  {
-    "a": "5",
-    "b": "6",
-    "c": "7",
-    "d": "8"
-  }
-]
-$ cat a.csv | cq -c
-[{"a":"1","b":"2","c":"3","d":"4"},{"a":"5","b":"6","c":"7","d":"8"}]
+o,p,q,r
+w,x,y,z
+$ cq a.csv -o y
+- a: o
+  b: p
+  c: q
+  d: r
+- a: w
+  b: x
+  c: "y"
+  d: z
+
+$ cat a.csv | cq -o j -c
+[{"a":"o","b":"p","c":"q","d":"r"},{"a":"w","b":"x","c":"y","d":"z"}]
 ```
 
 Filter function is not yet implemented.
