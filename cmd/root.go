@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
@@ -42,7 +43,7 @@ var rootCmd = &cobra.Command{
 	Args: func(cmd *cobra.Command, args []string) error {
 		// cq filter が実装されていないのでコメントアウト
 		// if len(args) < 1 {
-		// 	return errors.New("query argument is required")
+		// 	return errors.New("cq filter argument is required")
 		// }
 		return nil
 	},
@@ -55,6 +56,11 @@ var rootCmd = &cobra.Command{
 			header = strings.Split(hs, ",")
 		} else {
 			header = []string{}
+		}
+		of, _ := cmd.Flags().GetString("output-format")
+		if !StringContains([]string{"csv", "c", "yaml", "y", "json", "j", "xml", "x"}, of) {
+			fmt.Printf("Invalid output format: %s\n", of)
+			os.Exit(6)
 		}
 
 		fs, _, _, err := strconv.UnquoteChar(fss, '"')
@@ -70,7 +76,7 @@ var rootCmd = &cobra.Command{
 			r := csv.NewReader(stdin)
 			r.FieldsPerRecord = -1
 			r.Comma = fs
-			fmt.Println(csvToJson(r, c, header))
+			query(r, c, header, of)
 		} else {
 			for _, fileName := range args {
 				fp, err := os.Open(fileName)
@@ -83,10 +89,30 @@ var rootCmd = &cobra.Command{
 				r := csv.NewReader(fp)
 				r.FieldsPerRecord = -1
 				r.Comma = fs
-				fmt.Println(csvToJson(r, c, header))
+				query(r, c, header, of)
 			}
 		}
 	},
+}
+
+func StringContains(list []string, target string) bool {
+	for _, v := range list {
+		if v == target {
+			return true
+		}
+	}
+	return false
+}
+
+func query(csvReader *csv.Reader, compact bool, header []string, outputFormat string) {
+	js := csvToJson(csvReader, compact, header)
+	if StringContains([]string{"json", "j"}, outputFormat) {
+		fmt.Println(js)
+	} else if StringContains([]string{"csv", "c"}, outputFormat) {
+		printJsonAsCsv(js)
+	} else if StringContains([]string{"yaml", "y"}, outputFormat) {
+		fmt.Println(jsonToYaml(js))
+	}
 }
 
 func csvToJson(csvReader *csv.Reader, compact bool, header []string) string {
@@ -138,6 +164,51 @@ func csvToJson(csvReader *csv.Reader, compact bool, header []string) string {
 	return string(jsonBytes)
 }
 
+func jsonToYaml(jsonString string) string {
+	var i []interface{}
+	err := json.Unmarshal([]byte(jsonString), &i)
+	if err != nil {
+		fmt.Printf("Failed to unmarshal\n\n%s\n", err)
+		os.Exit(7)
+	}
+	o, err := yaml.Marshal(i)
+	if err != nil {
+		fmt.Printf("Failed to marshal\n\n%s\n", err)
+		os.Exit(7)
+	}
+	return string(o)
+}
+
+func printJsonAsCsv(jsonString string) {
+	var i []map[string]interface{}
+	err := json.Unmarshal([]byte(jsonString), &i)
+	if err != nil {
+		fmt.Printf("Failed to unmarshal\n\n%s\n", err)
+		os.Exit(8)
+	}
+
+	var h []string
+	for _, v := range i {
+		for k := range v {
+			if !StringContains(h, k) {
+				h = append(h, k)
+			}
+		}
+	}
+
+	w := csv.NewWriter(os.Stdout)
+	w.Write(h)
+
+	for _, r := range i {
+		var cr []string
+		for _, lh := range h {
+			cr = append(cr, fmt.Sprint(r[lh]))
+		}
+		w.Write(cr)
+	}
+	w.Flush()
+}
+
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
@@ -153,6 +224,7 @@ func init() {
 	rootCmd.PersistentFlags().StringP("field-separator", "F", ",", "field separator")
 	rootCmd.PersistentFlags().BoolP("compact", "c", false, "compact instead of pretty-printed output")
 	rootCmd.PersistentFlags().StringP("header", "H", "", "header (comma separated string)")
+	rootCmd.PersistentFlags().StringP("output-format", "o", "csv", "[csv|c|yaml|y|json|j|xml|x] output format type. (default csv)")
 }
 
 // initConfig reads in config file and ENV variables if set.
