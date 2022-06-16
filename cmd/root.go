@@ -111,7 +111,7 @@ func query(csvReader *csv.Reader, compact bool, header []string, outputFormat st
 	} else if StringContains([]string{"csv", "c"}, outputFormat) {
 		printJsonAsCsv(js)
 	} else if StringContains([]string{"yaml", "y"}, outputFormat) {
-		fmt.Println(jsonToYaml(js))
+		fmt.Print(jsonToYaml(js))
 	}
 }
 
