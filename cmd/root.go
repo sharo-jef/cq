@@ -58,7 +58,7 @@ var rootCmd = &cobra.Command{
 			header = []string{}
 		}
 		of, _ := cmd.Flags().GetString("output-format")
-		if !StringContains([]string{"csv", "c", "yaml", "y", "json", "j", "xml", "x"}, of) {
+		if !StringContains([]string{"json", "j", "csv", "c", "yaml", "y" /*, "xml", "x"*/}, of) {
 			fmt.Printf("Invalid output format: %s\n", of)
 			os.Exit(6)
 		}
@@ -224,7 +224,7 @@ func init() {
 	rootCmd.PersistentFlags().StringP("field-separator", "F", ",", "field separator")
 	rootCmd.PersistentFlags().BoolP("compact", "c", false, "compact instead of pretty-printed output")
 	rootCmd.PersistentFlags().StringP("header", "H", "", "header (comma separated string)")
-	rootCmd.PersistentFlags().StringP("output-format", "o", "csv", "[csv|c|yaml|y|json|j|xml|x] output format type. (default csv)")
+	rootCmd.PersistentFlags().StringP("output-format", "o", "json", "[json|j|csv|c|yaml|y|xml|x] output format type. (default json)")
 }
 
 // initConfig reads in config file and ENV variables if set.
