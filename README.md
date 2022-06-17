@@ -3,7 +3,7 @@
 csv processor
 
 ```
-$ cat a.csv -o c
+$ cat a.csv
 a,b,c,d
 o,p,q,r
 w,x,y,z
